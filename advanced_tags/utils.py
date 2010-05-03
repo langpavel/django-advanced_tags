@@ -24,14 +24,14 @@ from models import Tag, TaggedItem, UserTaggedItem
 
 
 _tag_pattern = re.compile( \
-    r'(?P<weight>[+-]?\d+(\.\d+)?)?' + \
+    r'(?P<weight>[+-]?\d+(\.\d+)?)?[xX]?[:]?' + \
     r'(?P<attribs>(\w*:)*)\s*' + \
     r'(\{(?P<slug>.*)\}:?)?\s*' + \
     r'(?P<tag>.*)')
 
 
 def replace_accents(str):
-    "Replace accented characters with standart ascii chars"
+    "Replace accented characters with common ascii chars"
     return u"".join((c for c in unicodedata.normalize('NFD', str) \
         if unicodedata.category(c) != 'Mn'))
 
@@ -45,6 +45,10 @@ def normalize_slug(text, max_length=50):
 
 
 class TagParser(object):
+    """
+    >>> u"%s" % TagParser("Tag name")
+    u'{tag-name}Tag name'
+    """
 
     def __init__(self, tag_string, **kwargs):
         tag_parts = _tag_pattern.match(tag_string).groupdict()
@@ -56,8 +60,10 @@ class TagParser(object):
     def __unicode__(self):
         fmt = u""
         if self.weight:
-            fmt += u"" % self.weight
-        return u"".join(self.tags)
+            fmt += u"%.1f:" % self.weight
+        if self.attribs:
+            fmt += (u":".join(self.attribs)) + u":"
+        return u"%s{%s}%s" % (fmt, self.slug, self.tagname)
 
 
 class TagsParser(object):
@@ -68,3 +74,9 @@ class TagsParser(object):
 
     def __unicode__(self):
         return u"; ".join(self.tags)
+
+
+# Run doctest
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
