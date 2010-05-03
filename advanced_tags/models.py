@@ -14,7 +14,7 @@ from managers import TagManager, TaggedItemManager
 try:
     _DEFAULT_MIN_WEIGHT = settings.TAGS_DEFAULT_MIN_WEIGHT
 except AttributeError:
-    _DEFAULT_MIN_WEIGHT = 3.0
+    _DEFAULT_MIN_WEIGHT = 1.2
 
 
 class Tag(models.Model):
@@ -22,10 +22,17 @@ class Tag(models.Model):
         unique=True, db_index=True)
     name = models.CharField(_('tag name'), max_length=50, \
         unique=True, db_index=True)
+
+    # system tag have special meaning for system
+    # (e.g. 'featured post' or more generally 'selected item')
+    # and this tag does NOT display to visitors
     is_system = models.BooleanField(_('is system tag'), default=False)
-    is_hidden = models.BooleanField(_('is hidden tag'), default=False)
+
+    # this tag is not set directly to content but
+    # generalizes other tags instead
     is_super = models.BooleanField(_('is super tag'), default=False)
 
+    # minimal requested weight (i.e. minimal count of users
     min_weight = models.FloatField( \
         _('minimal required weight of tag to publish'), null=True, blank=True)
 
@@ -38,7 +45,7 @@ class Tag(models.Model):
             ("can_add_tag", "Can add tag"),
             ("can_add_system_tag", "Can add system tag"),
             ("can_remove_tag", "Can remove tag"),
-            ("can_remove_system_tag", "Can remove, system tag"),
+            ("can_remove_system_tag", "Can remove system tag"),
         )
 
     def __unicode__(self):

@@ -94,3 +94,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'advanced_tags',
 )
+
+# advanced_tags settings
+TAGS_DEFAULT_MIN_WEIGHT = 1.2
