@@ -1,0 +1,36 @@
+digraph tag_state_machine {
+	rankdir=LR;
+	node [fixedsize=true, width=0.5, height=0.5];
+	node [shape = doublecircle]; S0; RET;
+	node [shape = circle]; S1; S2; S3; S4; S5;
+
+	node [shape = rectangle, fixedsize=false];
+	E0 [label = "err escape"];
+	E1 [label = "err slug"];
+	E2 [label = "err date"];
+
+	S0 -> S1 [ label = "'\\'" ];
+	S0 -> S2 [ label = "'{': check empty slug" ];
+	S0 -> S3 [ label = "'['" ];
+	S0 -> S5 [ label = "':'"];
+	S0 -> S0 [ label = "',', ';': push&new tag\nelse: push" ];
+	S0 -> RET [ label = "EOF: flush name" ];
+
+	S1 -> E0 [ label = "EOF" ];
+	S1 -> S0 [ label = "else: push" ];
+	
+	S2 -> S2 [ label = "is_url_char: push slug" ];
+	S2 -> S0 [ label = "'}'" ];
+	S2 -> E1 [ label = "else"];
+
+	S3 -> S3 [ label = "[0-9\\.:\\s]: push from_date" ]
+	S3 -> S4 [ label = "'-': convert from_date" ]
+	S3 -> S0 [ label = "']': convert from_date" ]
+	S3 -> E2 [ label = "else" ];
+
+	S4 -> S4 [ label = "[0-9\\.:\\s]: push to_date" ];
+	S4 -> S0 [ label = "']': convert to_date" ]
+	S4 -> E2 [ label = "else" ];
+	
+	S5 -> S0 [ label = "':': flush_attrib\nelse: push(':'); push" ]
+}
