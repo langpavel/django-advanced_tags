@@ -17,16 +17,36 @@ except AttributeError:
     _DEFAULT_MIN_WEIGHT = 1.2
 
 
+class Flag(models.Model):
+    slug = models.SlugField(_('flag identifier'), max_length=50, \
+        unique=True, db_index=True)
+    description = models.TextField(_('flag description'), \
+        null=True, blank=True)
+
+
+class FlaggedItem(models.Model):
+    """
+    Holds the relationship between a falg and the item being flagged.
+    """
+    flag = models.ForeignKey(Flag, verbose_name=_('falg'), \
+        related_name='items')
+    content_type = models.ForeignKey(ContentType, \
+        verbose_name=_('content type'))
+    object_id = models.PositiveIntegerField(_('object id'), db_index=True)
+    object = generic.GenericForeignKey('content_type', 'object_id')
+    user = models.ForeignKey(User, verbose_name=_('user that set flag'))
+    priority = models.FloatField(_('priority of flag'), default=1.0)
+    valid_from = models.DateTimeField(_('valid from date'), \
+        blank=True, null=True)
+    valid_to = models.DateTimeField(_('valid to date'), \
+        blank=True, null=True)
+
+
 class Tag(models.Model):
     slug = models.SlugField(_('tag slug'), max_length=50, \
         unique=True, db_index=True)
     name = models.CharField(_('tag name'), max_length=50, \
         unique=True, db_index=True)
-
-    # system tag have special meaning for system
-    # (e.g. 'featured post' or more generally 'selected item')
-    # and this tag does NOT display to visitors
-    is_system = models.BooleanField(_('is system tag'), default=False)
 
     # this tag is not set directly to content but
     # generalizes other tags instead
@@ -68,12 +88,6 @@ class TaggedItem(models.Model):
 
     # sum of UserTaggedItem weights
     weight = models.FloatField(_('weight of tag'), default=1.0)
-
-    # this fields are applied on system tags, where this values make sense
-    valid_from = models.DateTimeField(_('valid from date'), \
-        blank=True, null=True)
-    valid_to = models.DateTimeField(_('valid to date'), \
-        blank=True, null=True)
 
     objects = TaggedItemManager()
 
