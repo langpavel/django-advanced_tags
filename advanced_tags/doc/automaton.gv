@@ -13,7 +13,7 @@ digraph tag_state_machine {
 	S0 -> S2 [ label = "'{': check empty slug" ];
 	S0 -> S3 [ label = "'['" ];
 	S0 -> S5 [ label = "':'"];
-	S0 -> S0 [ label = "',', ';': push&new tag\nelse: push" ];
+	S0 -> S0 [ label = "',', ';': push_tag\nelse: push" ];
 	S0 -> RET [ label = "EOF: flush name" ];
 
 	S1 -> E0 [ label = "EOF" ];

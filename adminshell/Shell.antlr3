@@ -1,0 +1,75 @@
+lexer grammar Shell;
+
+options {
+    language = Python;
+}
+
+/*
+evaluate returns [result]:
+    r=expression {result = r};
+
+expression returns [result]:
+    r=atom {result = r};
+
+atom returns [result]:
+    n=ID {result = $n.text};
+*/
+
+ID  :   ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
+    ;
+
+INT :   '0'..'9'+
+    ;
+
+FLOAT
+    :   ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
+    |   '.' ('0'..'9')+ EXPONENT?
+    |   ('0'..'9')+ EXPONENT
+    ;
+
+STRING
+    :  '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
+    |  '\'' ( ESC_SEQ | ~('\\'|'\'') )* '\''
+    ;
+
+fragment
+EXPONENT : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
+
+fragment
+HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
+
+fragment
+ESC_SEQ
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    |   BYTE_ESC
+    |   UNICODE_ESC
+    |   LONG_UNICODE_ESC
+    ;
+
+fragment
+HEX_8BIT
+    :   HEX_DIGIT HEX_DIGIT
+    ;
+
+fragment
+BYTE_ESC
+    :   '\\' 'x' HEX_8BIT
+    ;
+
+fragment
+UNICODE_ESC
+    :   '\\' 'u' HEX_8BIT HEX_8BIT
+    ;
+
+fragment
+LONG_UNICODE_ESC
+    :   '\\' 'U' HEX_8BIT HEX_8BIT HEX_8BIT HEX_8BIT
+    ;
+
+WS  :   ( ' '+
+        | '\t'+
+        | '\r'+
+        | '\n'+
+        ) {$channel=HIDDEN;}
+    ;
+

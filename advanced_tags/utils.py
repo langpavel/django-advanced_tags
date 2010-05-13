@@ -157,8 +157,51 @@ class TagParser(object):
 class TagsParser(object):
 
     def __init__(self, tags_string, **kwargs):
-        self.tags = [TagParser(s.strip(), **kwargs) \
-            for s in re.split(r'[,;]+', tags_string)]
+        #self.tags = [TagParser(s.strip(), **kwargs) \
+        #    for s in re.split(r'[,;]+', tags_string)]
+        self.tags_string = force_unicode(tags_string)
+        self._parse(self.tags_string)
+        self.tags = []
+        self._proto = self._proto_tag()
+        tags_string
+
+    def _proto_tag(self):
+        #Creates support dictionary for parsing
+        return {
+            'buffer': u'',
+            'slug': u'',
+            'f_dt': None,
+            't_dt': None,
+            'attrs': [],
+        }
+
+    def _push(self, ch)
+        self._proto['buffer'] += ch
+
+    def _trans(self, ch, state):
+        #Transitions
+        if state == 0:
+            if ch == u'\\':
+                return 1
+            if ch == u'{':
+                return 2
+            if ch == u'[':
+                return 3
+            if ch == u':':
+                return 5
+            if ch in (u',', u';', u'\n', u'\r', None):
+                self._new_tag()
+                return 0
+            self._push(ch)
+            return 0
+
+
+    def _parse(self, str):
+        state = 0
+        for ch in str:
+            state = self._trans(ch, state)
+        state = self._trans(None, state)
 
     def __unicode__(self):
         return u"; ".join(self.tags)
+
